@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RoboStream project page">
+  <title>RoboStream Project Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <section class="hero">
+    <div class="container center">
+      <h1 class="title">
+        <span class="title-highlight">RoboStream</span>:
+        Weaving Spatio-Temporal Reasoning with Memory in Vision-Language Models for Robotics
+      </h1>
+      <p class="subtitle center">Under Review</p>
+      <div class="links">
+        <a href="Latex/ECCV_2026_Paper_Template.pdf" target="_blank" rel="noopener">Paper PDF</a>
+        <a href="#bibtex">BibTeX</a>
+        <a href="#" onclick="return false;">Code (Coming Soon)</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <img src="Figures/teaser.png" alt="RoboStream teaser figure">
+      <p>
+        <b>Abstract.</b> Enabling reliable long-horizon robotic manipulation is a crucial step toward open-world embodied intelligence. However, VLM-based planners treat each step as an isolated observation-to-action mapping, forcing them to reinfer scene geometry from raw pixels at every decision step while remaining unaware of how prior actions have reshaped the environment. Despite strong short-horizon performance, these systems lack the spatio-temporal reasoning required for persistent geometric anchoring and memory of action-triggered state transitions. Without persistent state tracking, perceptual errors accumulate across the execution horizon, temporarily occluded objects are catastrophically forgotten, and these compounding failures lead to precondition violations that cascade through subsequent steps. In contrast, humans maintain a persistent mental model that continuously tracks spatial relations and action consequences across interactions rather than reconstructing them at each instant. 
+ Inspired by this human capacity for causal spatio-temporal reasoning with persistent memory, we propose <b>RoboStream</b>, a training-free framework that achieves geometric anchoring through Spatio-Temporal Fusion Tokens (STF-Tokens), which bind visual evidence to 3D geometric attributes for persistent object grounding, and maintains causal continuity via a Causal Spatio-Temporal Graph (CSTG) that records action-triggered state transitions across steps. This design enables the planner to trace causal chains and preserve object permanence under occlusion without additional training or fine-tuning. RoboStream achieves 90.5% on long-horizon RLBench and 44.4% on challenging real-world block-building tasks, where both SoFar and VoxPoser score 11.1%, demonstrating that spatio-temporal reasoning and causal memory are critical missing components for reliable long-horizon manipulation.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Demos</h2>
+      <h3 class="subtitle-section">Real-World Manipulation</h3>
+      <div class="video-grid">
+        <!-- Build Tasks -->
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/hard_build1.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Assemble the blocks to match the goal image.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/medium_build.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Assemble the blocks to match the goal image.</p>
+        </div>
+
+        <!-- Disassemble Tasks -->
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/hard1_exc.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Disassemble the structure to match the goal image.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/hard3_exc.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Disassemble the structure to match the goal image.</p>
+        </div>
+
+        <!-- Hide and Seek Tasks -->
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/hide1.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Hide the purple cube with the brown cup, then restore.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/hide2.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Hide the purple cube with the brown cup, then restore.</p>
+        </div>
+      </div>
+
+      <h3 class="subtitle-section">Simulation Experiments</h3>
+      <div class="sim-video-grid">
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/bridge_between_towers.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Bridge two towers with a long block.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/cover_bottom_block_with_box.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Hide blue cube, then restore.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/cover_top_block_with_box.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Hide red cube, move box, restore.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/place_blocks_in_two_containers.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Arrange objects to match goal.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/place_blocks_in_two_containers_hard.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Arrange objects to match goal (Hard).</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/stack_five_colors.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Stack five colored blocks.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/stack_three_colors.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Stack three colored blocks.</p>
+        </div>
+        <div class="video-card">
+          <video controls autoplay loop muted playsinline>
+            <source src="Videos/unstack_then_stack_four_colors.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Sort cubes by color, then restore.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Method</h2>
+      <img src="Figures/Overview.png" alt="RoboStream method overview">
+      <p>
+        STF-Tokens bind visual evidence with explicit 3D geometry, while CSTG tracks object states and action-triggered transitions over time.
+        This allows the VLM planner to reason with stable object references and causal history, reducing cascading failures under occlusion.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Tasks</h2>
+      <img src="Figures/Qualitative_results.png" alt="Qualitative comparison figure">
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Results</h2>
+      <img src="Figures/real_world_res.png" alt="Real-world manipulation results">
+      <img src="Figures/SimplerEnv_Tab.png" alt="SIMPLER benchmark results">
+      <img src="Figures/RLBench_Long_Tab.png" alt="RLBench long-horizon results">
+      <img src="Figures/VQA_Tab.png" alt="Spatial reasoning and Open6DOR results">
+      <img src="Figures/Ablation_Tab.png" alt="Ablation study results">
+    </div>
+  </section>
+
+  <section class="section" id="bibtex">
+    <div class="container">
+      <h2>BibTeX</h2>
+      <pre><code>@inproceedings{robostream2026,
+  title={RoboStream: Weaving Spatio-Temporal Reasoning with Memory in Vision-Language Models for Robotics},
+  author={Anonymous Authors},
+  booktitle={European Conference on Computer Vision (ECCV)},
+  year={2026}
+}</code></pre>
+    </div>
+  </section>
+  
+</body>
+</html>

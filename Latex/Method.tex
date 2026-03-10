@@ -1,0 +1,86 @@
+
+\section{Method}
+\label{sec:method}
+\subsection{Overview}
+\label{sec:overview}
+
+
+
+
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/Overview.pdf}
+    \caption{\textbf{Overview of the RoboStream Framework.} The system processes multi-modal RGB-D inputs through three hierarchical stages: (1) Object-Centric Perception and Spatio-Temporal Token Fusion, where raw visual data is distilled into STF-Tokens by grounding visual evidence within 3D geometric primitives (centroids and Gaussian shapes); (2) 4D Causal Spatio-Temporal Graph Construction, which maintains persistent memory encoding object identities and state transitions across time steps; and (3) VLM-based Reasoning and Planning, where the VLM leverages both the CSTG and visual inputs to perform high-level task planning and precise robotic manipulation.}
+    \label{fig:overview}
+\end{figure}
+
+
+VLMs exhibit strong generalization in high-level manipulation planning~\cite{brohan2023saycan, zitkovich2023rt, kim2025openvla}, yet existing planners treat each step independently, lacking the persistent spatio-temporal memory required for long-horizon tasks. Without structured world-state tracking, perception errors compound over time and recovery from unexpected disturbances becomes intractable.
+We propose RoboStream, which constructs geometry-grounded STF-Tokens by binding visual evidence to 3D geometric attributes from RGB-D observations (Sec.~\ref{sec:stf}), organizes them into a Causal Spatio-Temporal Graph (CSTG) that maintains persistent object identities and logs action-triggered state transitions in a sliding-window memory (Sec.~\ref{sec:cstg}), and feeds this structured memory into the VLM for chain-of-thought verification to generate 6-DoF action directives (Sec.~\ref{sec:vlm_planning}), as illustrated in Fig.~\ref{fig:overview}.
+
+Formally, given RGB-D observation $(I_t, D_t)$, goal specification $I_{\text{goal}}$, and memory $\mathcal{M}_{<t}$, RoboStream constructs STF-Tokens encoding per-object 3D geometric properties and visual appearance:
+\begin{equation}
+    \mathcal{T}_t^{\text{STF}} = \Phi_{\text{enc}}(I_t, D_t \mid \mathcal{M}_{<t}),
+\end{equation}
+which are incorporated as nodes into the CSTG $\mathcal{G}_t^{\text{CST}}$. By recursively merging incoming STF-Tokens with historical graph state, the CSTG maintains persistent object identities and inter-object spatial relations across time without requiring model retraining:
+\begin{equation}
+    \mathcal{G}_t^{\text{CST}} = \Psi_{\text{graph}}(\mathcal{T}_t^{\text{STF}},\; \mathcal{G}_{t-1}^{\text{CST}}).
+\end{equation}
+Action generation is then decoupled to balance VLM semantic generalization with robot execution precision. Given a context-augmented prompt $\mathcal{P}_t$ assembled from $\mathcal{G}_t^{\text{CST}}$ and the current observation, the VLM produces a semantic action directive $\hat{a}_t$ conditioned on the goal $I_{\text{goal}}$ and the accumulated causal history:
+\begin{equation}
+    \hat{a}_t = \Pi_{\theta}(I_{\text{goal}},\; \mathcal{P}_t \mid \mathcal{G}_t^{\text{CST}}),
+    \label{eq:action_directive}
+\end{equation}
+which is deterministically instantiated into a 6-DoF pose by resolving object identities against the geometry of STF-Tokens stored in $\mathcal{G}_t^{\text{CST}}$:
+\begin{equation}
+    a_t = \Phi_{\text{inst}}(\hat{a}_t,\; \mathcal{G}_t^{\text{CST}}).
+\end{equation}
+This decoupled design preserves VLM semantic reasoning while delegating precise coordinate extraction to deterministic geometry resolution, enabling training-free deployment across various scenarios. We elaborate on each stage in Sec.~\ref{sec:stf}--\ref{sec:vlm_planning}.
+
+
+
+
+
+
+\subsection{Object-Centric Perception}
+\label{sec:perception}
+% \vspace{-1em}
+To construct scene representations prioritizing task-relevant entities, we employ a two-stage perception pipeline. Given the RGB-D observation $(I_t, D_t)$, goal specification $I_{\text{goal}}$, and accumulated memory $\mathcal{M}_{<t}$, we prompt a VLM to identify task-relevant objects and output open-vocabulary descriptors $\mathcal{D}=\{d_1,\ldots,d_N\}$~\cite{qisofar, zhouroborefer}. The goal specification $I_{\text{goal}}$ accepts either a reference goal image or a natural language instruction, both applicable in real-world and simulation settings. Conditioning on $\mathcal{M}_{<t}$ allows the descriptor set to maintain consistent object identities across steps, implicitly filtering task-irrelevant entities and reducing computational overhead in downstream modules. The resulting descriptors condition an open-vocabulary segmentation model to produce pixel-accurate masks $\{M_i\}_{i=1}^{N}=\mathrm{SAM3}(I_t,\mathcal{D})$~\cite{carion2025sam}, where $M_i\in\{0,1\}^{H\times W}$. Combined with the depth map $D_t$~\cite{depthanything}, each mask defines a spatially coherent region for 3D point cloud extraction, providing the inputs to $\Phi_{\text{enc}}$ for constructing $\mathcal{T}_t^{\text{STF}}$ as in Sec.~\ref{sec:stf}.
+
+
+\subsection{Spatio-Temporal Token Fusion}
+\label{sec:stf}
+
+Given instance masks $\{M_i\}_{i=1}^{N}$ and the point cloud from the perception stage, we construct a per-object Spatio-Temporal Fusion Token $\tau_i^t$ by integrating visual evidence with metric geometry into a unified, object-centric representation; the full set $\mathcal{T}_t^{\text{STF}} = \{\tau_i^t\}_{i=1}^{N}$ constitutes the encoder output $\Phi_{\text{enc}}$ defined in Sec.~\ref{sec:overview}. For each object $o_i$, the mask $M_i$ is applied to the RGB observation $I_t$ to obtain a masked image $\hat{I}_i^t$, which is passed through the VLM visual encoder~\cite{radford2021learning, dosovitskiy2020image} to produce a $16 \times 16$ grid of patch tokens. Patches with an IoU exceeding $I_{th}$ relative to $M_i$ are selected, projected into the language space, and aggregated to form the visual evidence $\mathbf{v}_i^t$. Unlike methods that pass multiple masked images directly to the VLM, this design avoids redundant background processing by compressing each object's filtered visual tokens, spatial position, geometry, and temporal trajectory into a compact token sequence, shifting VLM reasoning from raw pixels to structured object instances.
+
+In parallel, we define a shape representation vector $\mathbf{s}_i^t$ constructed from Gaussian distribution parameters and geometric extrema along each spatial axis: $\mathbf{s}_i^t = \{(\mu_a, \sigma_a, a_{\min}, a_{\max}) \mid a \in \{x,y,z\}\}$. Unlike traditional bounding boxes, this captures geometric extent more completely, with the joint mean-standard-deviation encoding suppressing outlier noise while correcting Gaussian approximation bias. The centroid $\mathbf{c}_i^t = \mathrm{median}(\mathbf{P}_i) \in \mathbb{R}^3$ is extracted from the object-specific point cloud $\mathbf{P}_i$. Both $\mathbf{c}_i^t$ and $\mathbf{s}_i^t$ are serialized via the text tokenizer into the same language embedding space as $\mathbf{v}_i^t$, placing visual appearance and 3D geometry within a single context window. This shared space allows the VLM to jointly attend over heterogeneous visual and spatial signals without architectural modification, encoding the complete per-object state as:
+\begin{equation}
+\tau_i^t = \Big\langle \, \mathbf{v}_i^t, \; \mathbf{c}_i^t, \; \mathbf{s}_i^t, \; t \, \Big\rangle,
+\label{eq:stf_token}
+\end{equation}
+where $t$ denotes the current timestamp. By grounding visual tokens in explicit 3D geometry and temporal context, STF-Tokens enable deterministic spatial queries and suppress cascading errors in long-horizon manipulation tasks.
+
+
+
+
+\subsection{4D Causal Spatio-Temporal Graph}
+\label{sec:cstg}
+
+While STF-Tokens stabilize per-object spatial perception, long-horizon manipulation additionally requires reasoning about inter-object spatial relations and action causality. We address this by constructing the Causal Spatio-Temporal Graph (CSTG) $\mathcal{G}_t^{\text{CST}}$~\cite{armeni20193d, wald2020learning}, which realizes the graph update operator $\Psi_{\text{graph}}$ in Sec.~\ref{sec:overview} by integrating incoming STF-Tokens $\mathcal{T}_t^{\text{STF}}$ with the historical state $\mathcal{G}_{t-1}^{\text{CST}}$ through a spatial scene graph and a causal memory log. At each timestamp $t$, we construct a spatial scene graph $\mathcal{G}_t = (\mathcal{V}_t, \mathcal{E}_t)$ where each node $v_i \in \mathcal{V}_t$ corresponds to an object in $\mathcal{T}_t^{\text{STF}}$ and maintains a sliding-window buffer $\{\tau_i^{t-K+1}, \ldots, \tau_i^{t}\}$ of length $K$. Edges $e_{ij} \in \mathcal{E}_t$ encode pairwise spatial relations via Euclidean distance $d_{ij} = \|\mathbf{c}_i - \mathbf{c}_j\|_2$ and directional offset $\Delta\mathbf{c}_{ij} = \mathbf{c}_j - \mathbf{c}_i$.
+
+Building upon this structure, semantic events are detected by comparing STF-Tokens across the sliding window, covering both object-level events (e.g., planned displacement, unintended collision, occlusion) and task-level events (e.g., action execution, subtask completion). Each event is recorded with its timestamp, location, and causal source in the memory log $\mathcal{H}_t^{K}$, which is integrated with the spatial graph to form the complete CSTG:
+\begin{equation}
+\mathcal{G}_t^{\text{CST}} = \big( \mathcal{G}_t,\; \mathcal{H}_t^{K} \big).
+\label{eq:cstg}
+\end{equation}
+This structured representation enables deterministic verification of action pre-conditions at each planning step, triggering re-planning upon detected failure to prevent error accumulation over long horizons.
+
+
+
+
+\subsection{VLM-based Causal Reasoning and Planning}
+\label{sec:vlm_planning}
+
+At each planning step, RoboStream assembles the context-augmented prompt $\mathcal{P}_t$ from the CSTG $\mathcal{G}_t^{\text{CST}}$ encoding current object states and spatial relations, the annotated observation with object identity labels overlaid~\cite{yang2023set}, and the goal specification $I_{\text{goal}}$. This fusion of structured causal memory with grounded visual evidence enables $\Pi_{\theta}$ to reason jointly over historical context and current scene geometry. The VLM then performs chain-of-thought spatial verification~\cite{wei2022chain}, reviewing historical states, checking action pre-conditions against object geometry, and resolving causal conflicts from occlusion or dependencies, before generating the semantic action directive $\hat{a}_t$ as defined in Eq.~\ref{eq:action_directive}. Finally, $\hat{a}_t$ is instantiated into the 6-DoF action $a_t$ via $\Phi_{\text{inst}}$ by resolving object identities against STF-Token geometry stored in $\mathcal{G}_t^{\text{CST}}$ (Sec.~\ref{sec:overview}).
