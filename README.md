@@ -5,7 +5,6 @@
 - `index.html`：页面结构与内容
 - `assets/css/style.css`：样式与响应式布局
 - `Figures/`：网页中使用的论文图表素材
-- `RoboStream_paper.pdf`：网页中链接的论文 PDF
 
 ## 本地预览
 
