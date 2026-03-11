@@ -50,9 +50,40 @@ body {
   color: #374151;
 }
 
-.authors {
-  margin: 0;
+.authors-container {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.author-names {
+  font-family: "Google Sans", "Noto Sans", sans-serif;
+  font-size: 1.25rem;
+  color: #1d4ed8;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.author {
+  display: inline-block;
+  white-space: nowrap;
+  margin: 0 4px;
+}
+
+.author-block {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.author-affiliations {
+  font-size: 1.1rem;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.author-notes {
+  font-size: 0.95rem;
   color: #6b7280;
+  font-style: italic;
 }
 
 .links {
