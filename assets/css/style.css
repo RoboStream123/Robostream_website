@@ -36,6 +36,14 @@ body {
   color: #1d4ed8;
 }
 
+.title-icon {
+  width: auto;
+  height: 1em;
+  margin: 0 0.2em 0 0;
+  vertical-align: -0.1em;
+  display: inline-block;
+}
+
 .subtitle {
   margin: 14px 0 4px;
   font-size: 1.2rem;
@@ -188,6 +196,13 @@ code {
 
 .highlight-item b {
   color: #1d4ed8;
+}
+
+.highlight-item i b,
+.highlight-item b i {
+  color: inherit;
+  font-weight: 800;
+  text-shadow: 0 0 0.5px currentColor;
 }
 
 .footer {
