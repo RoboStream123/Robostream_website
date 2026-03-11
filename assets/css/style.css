@@ -59,20 +59,30 @@ body {
   margin-top: 18px;
 }
 
-.links a {
-  display: inline-block;
+.links .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: 6px 4px;
-  padding: 8px 14px;
+  padding: 8px 18px;
   border-radius: 999px;
-  border: 1px solid #d1d5db;
+  background-color: #363636;
+  color: #ffffff;
   text-decoration: none;
-  color: #1f2937;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  transition: background-color 0.2s ease;
 }
 
-.links a:hover {
-  border-color: #2563eb;
-  color: #1d4ed8;
+.links .btn:hover {
+  background-color: #4a4a4a;
+  color: #ffffff;
+}
+
+.links .btn i {
+  margin-right: 8px;
+  font-size: 1.2em;
 }
 
 .section {
