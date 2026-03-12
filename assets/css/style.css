@@ -83,7 +83,8 @@ body {
 .author-notes {
   font-size: 0.95rem;
   color: #6b7280;
-  font-style: italic;
+  font-style: normal;
+  margin-top: 12px;
 }
 
 .links {
