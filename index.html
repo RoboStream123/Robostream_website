@@ -214,8 +214,14 @@
 
   <section class="section" id="bibtex">
     <div class="container">
-      <h2>BibTeX</h2>
-      <pre><code>@misc{huang2026robostreamweavingspatiotemporalreasoning,
+      <div class="bibtex-header">
+        <h2>BibTeX</h2>
+        <button type="button" class="copy-bibtex-btn" data-copy-target="bibtex-code">
+          <i class="fa-regular fa-copy" aria-hidden="true"></i>
+          <span>Copy</span>
+        </button>
+      </div>
+      <pre><code id="bibtex-code">@misc{huang2026robostreamweavingspatiotemporalreasoning,
   title={RoboStream: Weaving Spatio-Temporal Reasoning with Memory in Vision-Language Models for Robotics},
   author={Yuzhi Huang and Jie Wu and Weijue Bu and Ziyi Xiong and Gaoyang Jiang and Ye Li and Kangye Ji and Shuzhao Xie and Yue Huang and Chenglei Wu and Jingyan Jiang and Zhi Wang},
   year={2026},
@@ -226,6 +232,60 @@
 }</code></pre>
     </div>
   </section>
+
+  <script>
+    const copyBibTeXButton = document.querySelector("[data-copy-target]");
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    if (copyBibTeXButton) {
+      const label = copyBibTeXButton.querySelector("span");
+      const icon = copyBibTeXButton.querySelector("i");
+      let resetTimer;
+
+      copyBibTeXButton.addEventListener("click", async () => {
+        const targetId = copyBibTeXButton.dataset.copyTarget;
+        const target = document.getElementById(targetId);
+
+        if (!target) {
+          return;
+        }
+
+        try {
+          await copyText(target.textContent.trim());
+          copyBibTeXButton.classList.add("copied");
+          label.textContent = "Copied";
+          icon.className = "fa-solid fa-check";
+        } catch (error) {
+          copyBibTeXButton.classList.add("copy-failed");
+          label.textContent = "Retry";
+          icon.className = "fa-solid fa-xmark";
+        }
+
+        window.clearTimeout(resetTimer);
+        resetTimer = window.setTimeout(() => {
+          copyBibTeXButton.classList.remove("copied", "copy-failed");
+          label.textContent = "Copy";
+          icon.className = "fa-regular fa-copy";
+        }, 1800);
+      });
+    }
+  </script>
   
 </body>
 </html>

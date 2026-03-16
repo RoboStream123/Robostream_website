@@ -127,6 +127,51 @@ h2 {
   font-size: 1.6rem;
 }
 
+.bibtex-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.bibtex-header h2 {
+  margin: 0;
+}
+
+.copy-bibtex-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.copy-bibtex-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.copy-bibtex-btn.copied {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.copy-bibtex-btn.copy-failed {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
 .subtitle-section {
   font-family: "Google Sans", "Noto Sans", sans-serif;
   font-size: 1.3rem;
@@ -203,6 +248,11 @@ code {
 @media (max-width: 768px) {
   .video-grid {
     grid-template-columns: 1fr;
+  }
+
+  .bibtex-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
