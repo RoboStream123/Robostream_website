@@ -6,3 +6,8 @@
 - 根站仓库的工作流文件是 `.github/workflows/deploy-pages.yml`，会在发布时拉取当前仓库 `RoboStream123/Robostream_website` 的 `main` 分支内容并部署到 Pages。
 - 已为根站工作流补充定时同步触发；当前根站仓库提交为 `cd81755`，后续会按 10 分钟周期自动同步当前仓库的最新内容。
 - 当前仓库最近一次与页面内容相关的提交为 `efcbeea`，包含 `Yuzhi Huang` 的机构更新。
+
+## 2026-06-18
+
+- 页面顶部论文状态已从 `Under Review` 更新为 `Accepted to ECCV 2026`。
+- BibTeX 暂时保持 arXiv `@misc` 格式，未改为会议论文格式。
