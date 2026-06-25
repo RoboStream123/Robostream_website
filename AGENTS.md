@@ -11,3 +11,8 @@
 
 - 页面顶部论文状态已从 `Under Review` 更新为 `Accepted to ECCV 2026`。
 - BibTeX 暂时保持 arXiv `@misc` 格式，未改为会议论文格式。
+
+## 2026-06-25
+
+- `Weijue Bu` 已添加 equal contribution 标记 `*`。
+- 机构 2 及实习备注中的公司名已从 `YXGN Robotics` 更新为 `Yuanxing Robotics`。
